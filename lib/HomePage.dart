@@ -20,6 +20,23 @@ class HomePage extends StatelessWidget {
     }
   """;
 
+  final String deleteTodo = """
+    mutation DeleteTodo(\$id: ID!) {
+      action: deleteTodo(id: \$id) {
+        id
+        title
+        description
+        createTime
+        deadline
+        createdBy {
+          id
+          name
+          email
+        }
+      }
+    }
+  """;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +47,7 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.supervised_user_circle),
             onPressed: () {
-              Navigator.push(context,
+              Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => UsersPage()));
             },
           )
@@ -120,15 +137,29 @@ class HomePage extends StatelessWidget {
                                     ));
                               },
                             ),
-                            FlatButton(
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete),
-                                  Text("Delete Todo")
-                                ],
-                              ),
-                              onPressed: () {},
-                            )
+                            Mutation(
+                              options: MutationOptions(
+                                  documentNode: gql(deleteTodo),
+                                  onCompleted: (dynamic resultData) {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => HomePage()));
+                                  }),
+                              builder: (RunMutation runMutation,
+                                  QueryResult result) {
+                                return RaisedButton(
+                                  child: Text(
+                                    "Delete Todo",
+                                  ),
+                                  onPressed: () {
+                                    runMutation({
+                                      'id': todo['id'],
+                                    });
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         )
                       ],
